@@ -1,13 +1,25 @@
 import 'package:flutter/material.dart';
-import 'package:minimal_chat_app/features/chat/controllers/chat_service.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:minimal_chat_app/features/auth/controllers/bloc/auth_bloc.dart';
+import 'package:minimal_chat_app/features/chat/controllers/users/users_bloc.dart';
 import 'package:minimal_chat_app/features/chat/pages/chat_page.dart';
 
 import '../../../utils/get_colors.dart';
 
-class UserListPage extends StatelessWidget {
-  UserListPage({super.key});
+class UserListPage extends StatefulWidget {
+  const UserListPage({super.key});
 
-  final chatService = ChatService();
+  @override
+  State<UserListPage> createState() => _UserListPageState();
+}
+
+class _UserListPageState extends State<UserListPage> {
+  @override
+  void initState() {
+    context.read<UsersBloc>().add(StartUserStream());
+    context.read<AuthBloc>().add(GetCurrentUser());
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -18,45 +30,96 @@ class UserListPage extends StatelessWidget {
   }
 
   Widget _buildUserList() {
-    return StreamBuilder(
-      stream: chatService.getUsersStream(),
-      builder: (BuildContext context, AsyncSnapshot snapshot) {
-        if (snapshot.hasError) {
-          return Center(child: Text('Error'));
-        }
-        if (snapshot.connectionState == ConnectionState.waiting) {
+    return BlocBuilder<UsersBloc, UsersState>(
+      builder: (context, state) {
+        if (state is UsersLoading) {
           return Center(child: CircularProgressIndicator());
         }
-        return ListView.builder(
-          padding: EdgeInsets.all(20),
-          itemCount: snapshot.data.length,
-          itemBuilder: (BuildContext context, int index) {
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 12.0),
-              child: ListTile(
-                leading: Icon(Icons.person_4_rounded),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+        if (state is UsersError) {
+          return Center(child: Text("Error: ${state.message}"));
+        }
+        if (state is UsersLoaded) {
+          return ListView.builder(
+            padding: EdgeInsets.all(20),
+            itemCount: state.users.length,
+            itemBuilder: (BuildContext context, int index) {
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12.0),
+                child: ListTile(
+                  leading: Icon(Icons.person_4_rounded),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  tileColor: getPrimary(context),
+                  title: Text(
+                    state.users[index]['name'],
+                    style: TextStyle(color: getOnPrimary(context)),
+                  ),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder:
+                            (context) => ChatPage(
+                              receiverID: state.users[index]['uid'],
+                              receiverName: state.users[index]['name'],
+                            ),
+                      ),
+                    );
+                  },
                 ),
-                tileColor: getTertiary(context),
-                title: Text(snapshot.data[index]['email']),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder:
-                          (context) => ChatPage(
-                            receiverID: snapshot.data[index]['uid'],
-                            receiverEmail: snapshot.data[index]['email'],
-                          ),
-                    ),
-                  );
-                },
-              ),
-            );
-          },
-        );
+              );
+            },
+          );
+        }
+        return SizedBox.shrink();
       },
     );
   }
 }
+
+  // Widget _buildUserList() {
+  //   return StreamBuilder(
+  //     stream: chatService.getUsersStream(),
+  //     builder: (BuildContext context, AsyncSnapshot snapshot) {
+  //       if (snapshot.hasError) {
+  //         return Center(child: Text('Error'));
+  //       }
+  //       if (snapshot.connectionState == ConnectionState.waiting) {
+  //         return Center(child: CircularProgressIndicator());
+  //       }
+  //   return ListView.builder(
+  //     padding: EdgeInsets.all(20),
+  //     itemCount: snapshot.data.length,
+  //     itemBuilder: (BuildContext context, int index) {
+  //       return Padding(
+  //         padding: const EdgeInsets.only(bottom: 12.0),
+  //         child: ListTile(
+  //           leading: Icon(Icons.person_4_rounded),
+  //           shape: RoundedRectangleBorder(
+  //             borderRadius: BorderRadius.circular(10),
+  //           ),
+  //           tileColor: getPrimary(context),
+  //           title: Text(
+  //             snapshot.data[index]['email'],
+  //             style: TextStyle(color: getOnPrimary(context)),
+  //           ),
+  //           onTap: () {
+  //             Navigator.push(
+  //               context,
+  //               MaterialPageRoute(
+  //                 builder:
+  //                     (context) => ChatPage(
+  //                       receiverID: snapshot.data[index]['uid'],
+  //                       receiverEmail: snapshot.data[index]['email'],
+  //                     ),
+  //               ),
+  //             );
+  //           },
+  //         ),
+  //       );
+  //     },
+  //   );
+  // },
+  //   );
+  // }

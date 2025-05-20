@@ -8,8 +8,16 @@ Color getPrimary(context) {
   return Theme.of(context).colorScheme.primary;
 }
 
+Color getOnPrimary(context) {
+  return Theme.of(context).colorScheme.onPrimary;
+}
+
 Color getSecondary(context) {
   return Theme.of(context).colorScheme.secondary;
+}
+
+Color getOnSecondary(context) {
+  return Theme.of(context).colorScheme.onSecondary;
 }
 
 Color getTertiary(context) {

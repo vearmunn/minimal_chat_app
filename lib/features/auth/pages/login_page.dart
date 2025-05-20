@@ -1,6 +1,7 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:flutter/material.dart';
-import 'package:minimal_chat_app/features/auth/controllers/auth_service.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:minimal_chat_app/features/auth/controllers/bloc/auth_bloc.dart';
 
 import 'package:minimal_chat_app/utils/spacer.dart';
 
@@ -9,33 +10,7 @@ import '../../../utils/get_colors.dart';
 class LoginPage extends StatelessWidget {
   final VoidCallback onTap;
 
-  LoginPage({super.key, required this.onTap});
-
-  // final TextEditingController _emailController = TextEditingController();
-  // final TextEditingController _passwordController = TextEditingController();
-
-  final authService = AuthService();
-  // void login(context) async {
-  //   try {
-  //     await authService.signIn(_emailController.text, _passwordController.text);
-  //   } catch (e) {
-  //     showDialog(
-  //       context: context,
-  //       builder: (context) => AlertDialog(title: Text(e.toString())),
-  //     );
-  //   }
-  // }
-
-  void loginWithGoogle(context) async {
-    try {
-      await authService.signInWithGoogle();
-    } catch (e) {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(title: Text(e.toString())),
-      );
-    }
-  }
+  const LoginPage({super.key, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -55,6 +30,51 @@ class LoginPage extends StatelessWidget {
               style: TextStyle(color: getPrimary(context), fontSize: 16),
             ),
             verticalSpacer(20),
+            BlocBuilder<AuthBloc, AuthState>(
+              builder: (context, state) {
+                if (state is AuthLoading) {
+                  return CircularProgressIndicator();
+                }
+                return ElevatedButton(
+                  onPressed:
+                      () => context.read<AuthBloc>().add(SignInWithGoogle()),
+                  child: Text('Sign In with Google'),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
+  // final TextEditingController _emailController = TextEditingController();
+  // final TextEditingController _passwordController = TextEditingController();
+
+  // final authService = AuthService();
+  // void login(context) async {
+  //   try {
+  //     await authService.signIn(_emailController.text, _passwordController.text);
+  //   } catch (e) {
+  //     showDialog(
+  //       context: context,
+  //       builder: (context) => AlertDialog(title: Text(e.toString())),
+  //     );
+  //   }
+  // }
+
+  // void loginWithGoogle(context) async {
+  //   try {
+  //     await authService.signInWithGoogle();
+  //   } catch (e) {
+  //     showDialog(
+  //       context: context,
+  //       builder: (context) => AlertDialog(title: Text(e.toString())),
+  //     );
+  //   }
+  // }
 
             // // email textfield
             // CustomTextfield(
@@ -99,13 +119,3 @@ class LoginPage extends StatelessWidget {
             //   ],
             // ),
             // verticalSpacer(20),
-            ElevatedButton(
-              onPressed: () => loginWithGoogle(context),
-              child: Text('Sign In with Google'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}

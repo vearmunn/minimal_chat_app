@@ -22,6 +22,7 @@ class CustomTextfield extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20.0),
       child: TextField(
+        textCapitalization: TextCapitalization.sentences,
         focusNode: focusNode,
         controller: controller,
         obscureText: obscure,

@@ -1,17 +1,20 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:flutter/material.dart';
-import 'package:minimal_chat_app/features/auth/controllers/auth_service.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:minimal_chat_app/features/chat/controllers/chat_service.dart';
+import 'package:minimal_chat_app/features/chat/controllers/send_message/send_message_cubit.dart';
+import 'package:minimal_chat_app/utils/get_exact_time.dart';
 import 'package:minimal_chat_app/widgets/custom_textfield.dart';
 
 import '../../../widgets/chat_bubble.dart';
+import '../controllers/chatting/chat_bloc.dart';
 
 class ChatPage extends StatefulWidget {
-  final String receiverEmail;
+  final String receiverName;
   final String receiverID;
   const ChatPage({
     super.key,
-    required this.receiverEmail,
+    required this.receiverName,
     required this.receiverID,
   });
 
@@ -22,14 +25,19 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> {
   final TextEditingController _messageController = TextEditingController();
 
-  final ChatService _chatService = ChatService();
-  final AuthService _authService = AuthService();
-
   FocusNode myFocusNode = FocusNode();
-  late final ScrollController _scrollController = ScrollController();
+  late final ScrollController _scrollController;
+  final chatService = ChatService();
 
   @override
   void initState() {
+    _scrollController = ScrollController();
+    context.read<ChatBloc>().add(
+      GetMessagesStream(
+        userID: chatService.getCurrentUser()!.uid,
+        otherUserID: widget.receiverID,
+      ),
+    );
     myFocusNode.addListener(() {
       if (myFocusNode.hasFocus) {
         // cause a delay so that the keyboard has time to show up
@@ -38,7 +46,6 @@ class _ChatPageState extends State<ChatPage> {
         Future.delayed(Duration(milliseconds: 500), () => scrollDown());
       }
     });
-    Future.delayed(Duration(milliseconds: 500), () => scrollDown());
     super.initState();
   }
 
@@ -60,80 +67,99 @@ class _ChatPageState extends State<ChatPage> {
 
   void sendMessage() async {
     if (_messageController.text.isNotEmpty) {
-      await _chatService.sendMessage(
-        widget.receiverID,
-        _messageController.text,
+      context.read<SendMessageCubit>().sendMessage(
+        receiverID: widget.receiverID,
+        message: _messageController.text,
       );
       _messageController.clear();
     }
-    scrollDown();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.receiverEmail)),
+      appBar: AppBar(
+        title: Text(
+          widget.receiverName,
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+        ),
+      ),
       body: Column(children: [_buildMessageList(), _buildMessageTextField()]),
     );
   }
 
   Widget _buildMessageList() {
     return Expanded(
-      child: StreamBuilder(
-        stream: _chatService.getMessages(
-          widget.receiverID,
-          _authService.getCurrentUser()!.uid,
-        ),
-        builder: (BuildContext context, AsyncSnapshot snapshot) {
-          if (snapshot.hasError) {
-            return Text(snapshot.error.toString());
+      child: BlocConsumer<ChatBloc, ChatState>(
+        listener: (context, state) {
+          if (state is ChatLoaded) {
+            Future.delayed(Duration(milliseconds: 500), () => scrollDown());
           }
-          if (snapshot.connectionState == ConnectionState.waiting) {
+        },
+        builder: (context, state) {
+          if (state is ChatError) {
+            return Text(state.message);
+          }
+          if (state is ChatLoading) {
             return Center(child: CircularProgressIndicator());
           }
-          return ListView.builder(
-            controller: _scrollController,
-            padding: EdgeInsets.all(20),
-            itemCount: snapshot.data.docs.length,
-            itemBuilder: (BuildContext context, int index) {
-              bool isCurrentUser =
-                  snapshot.data.docs[index]['senderID'] ==
-                  _authService.getCurrentUser()!.uid;
-              return ChatBubble(
-                text: snapshot.data.docs[index]['message'],
-                isCurrentUser: isCurrentUser,
-              );
-            },
-          );
+          if (state is ChatLoaded) {
+            return ListView.builder(
+              controller: _scrollController,
+              padding: EdgeInsets.all(20),
+              itemCount: state.messages.docs.length,
+              itemBuilder: (BuildContext context, int index) {
+                bool isCurrentUser =
+                    state.messages.docs[index]['senderID'] ==
+                    chatService.getCurrentUser()!.uid;
+
+                return ChatBubble(
+                  text: state.messages.docs[index]['message'],
+                  time: getExactTime(
+                    state.messages.docs[index]['timestamp'].toDate(),
+                  ),
+                  isCurrentUser: isCurrentUser,
+                );
+              },
+            );
+          }
+          return SizedBox.shrink();
         },
       ),
     );
   }
 
   Widget _buildMessageTextField() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(0, 0, 20, 20),
-      child: Row(
-        children: [
-          Expanded(
-            child: CustomTextfield(
-              hintText: 'Your message...',
-              obscure: false,
-              controller: _messageController,
-              focusNode: myFocusNode,
+    return BlocListener<SendMessageCubit, SendMessageState>(
+      listener: (context, state) {
+        if (state is MessageSent) {
+          scrollDown();
+        }
+      },
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(0, 12, 20, 20),
+        child: Row(
+          children: [
+            Expanded(
+              child: CustomTextfield(
+                hintText: 'Your message...',
+                obscure: false,
+                controller: _messageController,
+                focusNode: myFocusNode,
+              ),
             ),
-          ),
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.green,
-              shape: BoxShape.circle,
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.green,
+                shape: BoxShape.circle,
+              ),
+              child: IconButton(
+                onPressed: sendMessage,
+                icon: Icon(Icons.send, color: Colors.white),
+              ),
             ),
-            child: IconButton(
-              onPressed: sendMessage,
-              icon: Icon(Icons.send, color: Colors.white),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
