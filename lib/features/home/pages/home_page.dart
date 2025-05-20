@@ -20,9 +20,10 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       body: _screens[currentIndex],
       bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: getTertiary(context),
         currentIndex: currentIndex,
-        selectedItemColor: getInversePrimary(context),
-        unselectedItemColor: getPrimary(context),
+        selectedItemColor: getPrimary(context),
+        unselectedItemColor: getSecondary(context).withAlpha(150),
         selectedLabelStyle: TextStyle(fontWeight: FontWeight.bold),
         onTap: (value) {
           setState(() {

@@ -20,23 +20,26 @@ class CustomTextfield extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+      padding: const EdgeInsets.fromLTRB(20, 0, 10, 0),
       child: TextField(
         textCapitalization: TextCapitalization.sentences,
         focusNode: focusNode,
         controller: controller,
         obscureText: obscure,
+        style: TextStyle(fontSize: 14),
         decoration: InputDecoration(
           enabledBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: getTertiary(context)),
+            borderRadius: BorderRadius.circular(50),
+            borderSide: BorderSide(color: getSecondary(context)),
           ),
           focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(50),
             borderSide: BorderSide(color: getPrimary(context)),
           ),
-          fillColor: getSecondary(context),
+          fillColor: getTertiary(context),
           filled: true,
           hintText: hintText,
-          hintStyle: TextStyle(color: getPrimary(context)),
+          hintStyle: TextStyle(color: getOnTertiary(context).withAlpha(100)),
         ),
       ),
     );

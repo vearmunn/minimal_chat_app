@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:minimal_chat_app/features/chat/controllers/chat_service.dart';
 import 'package:minimal_chat_app/features/chat/controllers/send_message/send_message_cubit.dart';
+import 'package:minimal_chat_app/utils/get_colors.dart';
 import 'package:minimal_chat_app/utils/get_exact_time.dart';
 import 'package:minimal_chat_app/widgets/custom_textfield.dart';
 
@@ -136,8 +137,9 @@ class _ChatPageState extends State<ChatPage> {
           scrollDown();
         }
       },
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(0, 12, 20, 20),
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(0, 12, 16, 16),
+        color: getSecondary(context).withAlpha(30),
         child: Row(
           children: [
             Expanded(
@@ -150,12 +152,13 @@ class _ChatPageState extends State<ChatPage> {
             ),
             Container(
               decoration: BoxDecoration(
-                color: Colors.green,
+                color: getPrimary(context),
                 shape: BoxShape.circle,
               ),
               child: IconButton(
+                padding: EdgeInsets.only(left: 4),
                 onPressed: sendMessage,
-                icon: Icon(Icons.send, color: Colors.white),
+                icon: Icon(Icons.send, color: getOnPrimary(context)),
               ),
             ),
           ],

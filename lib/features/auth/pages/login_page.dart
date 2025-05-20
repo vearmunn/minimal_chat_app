@@ -15,34 +15,78 @@ class LoginPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: getSurface(context),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // logo
-            Icon(Icons.message, size: 60, color: getPrimary(context)),
-            verticalSpacer(30),
+      backgroundColor: getPrimary(context),
+      body: SafeArea(
+        child: SizedBox(
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              verticalSpacer(20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Icon(Icons.message, size: 30, color: getOnPrimary(context)),
+                  horizontalSpacer(4),
+                  Text(
+                    'Mini Chat',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 24,
+                      color: getOnPrimary(context),
+                    ),
+                  ),
+                ],
+              ),
+              verticalSpacer(20),
+              Container(
+                width: MediaQuery.of(context).size.width * 0.9,
+                height: MediaQuery.of(context).size.height * 0.5,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Image.asset('assets/images/login_image.jpg'),
+              ),
 
-            // welcome back message
-            Text(
-              "Welcome back, you've been missed!",
-              style: TextStyle(color: getPrimary(context), fontSize: 16),
-            ),
-            verticalSpacer(20),
-            BlocBuilder<AuthBloc, AuthState>(
-              builder: (context, state) {
-                if (state is AuthLoading) {
-                  return CircularProgressIndicator();
-                }
-                return ElevatedButton(
-                  onPressed:
-                      () => context.read<AuthBloc>().add(SignInWithGoogle()),
-                  child: Text('Sign In with Google'),
-                );
-              },
-            ),
-          ],
+              verticalSpacer(30),
+              Text(
+                "Real Talk Starts Here",
+                style: TextStyle(
+                  color: getOnPrimary(context),
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              verticalSpacer(4),
+              Text(
+                "A fun, easy way to keep the conversation going with your favorite people.",
+                textAlign: TextAlign.center,
+                style: TextStyle(color: getOnPrimary(context), fontSize: 12),
+              ),
+              verticalSpacer(30),
+              BlocBuilder<AuthBloc, AuthState>(
+                builder: (context, state) {
+                  if (state is AuthLoading) {
+                    return CircularProgressIndicator(
+                      color: getOnPrimary(context),
+                    );
+                  }
+                  return ElevatedButton.icon(
+                    onPressed:
+                        () => context.read<AuthBloc>().add(SignInWithGoogle()),
+                    icon: Image.asset('assets/images/google.png', height: 28),
+                    label: Text(
+                      'Sign In with Google',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );

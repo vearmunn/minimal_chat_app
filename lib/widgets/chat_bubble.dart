@@ -35,14 +35,18 @@ class ChatBubble extends StatelessWidget {
                 12,
               ),
               decoration: BoxDecoration(
-                color: isCurrentUser ? Colors.green : getTertiary(context),
+                color:
+                    isCurrentUser ? getPrimary(context) : getTertiary(context),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
                 text,
                 textAlign: TextAlign.left,
                 style: TextStyle(
-                  color: isCurrentUser ? Colors.white : Colors.black,
+                  color:
+                      isCurrentUser
+                          ? getOnPrimary(context)
+                          : getOnTertiary(context),
                 ),
               ),
             ),
@@ -56,8 +60,8 @@ class ChatBubble extends StatelessWidget {
                   fontSize: 12,
                   color:
                       isCurrentUser
-                          ? getSecondary(context)
-                          : getPrimary(context),
+                          ? getOnSecondary(context).withAlpha(200)
+                          : getSecondary(context).withAlpha(150),
                 ),
               ),
             ),

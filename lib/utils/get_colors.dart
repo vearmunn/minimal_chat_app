@@ -24,6 +24,6 @@ Color getTertiary(context) {
   return Theme.of(context).colorScheme.tertiary;
 }
 
-Color getInversePrimary(context) {
-  return Theme.of(context).colorScheme.inversePrimary;
+Color getOnTertiary(context) {
+  return Theme.of(context).colorScheme.onTertiary;
 }
