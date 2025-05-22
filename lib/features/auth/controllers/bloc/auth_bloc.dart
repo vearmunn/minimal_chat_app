@@ -42,9 +42,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         });
 
         emit(AuthSuccess(userCredential));
-      } on FirebaseAuthException catch (e) {
-        emit(AuthFailed(e.message!));
       } catch (e) {
+        print(e);
         emit(AuthFailed(e.toString()));
       }
     });
