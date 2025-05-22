@@ -67,7 +67,17 @@ class LoginPage extends StatelessWidget {
                 style: TextStyle(color: getOnPrimary(context), fontSize: 12),
               ),
               verticalSpacer(30),
-              BlocBuilder<AuthBloc, AuthState>(
+              BlocConsumer<AuthBloc, AuthState>(
+                listener: (context, state) {
+                  if (state is AuthFailed) {
+                    showDialog(
+                      context: context,
+                      builder:
+                          (context) =>
+                              AlertDialog(title: Text(state.errorMessage)),
+                    );
+                  }
+                },
                 builder: (context, state) {
                   if (state is AuthLoading) {
                     return CircularProgressIndicator(
