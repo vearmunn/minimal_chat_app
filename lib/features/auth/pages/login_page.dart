@@ -61,10 +61,13 @@ class LoginPage extends StatelessWidget {
                 ),
               ),
               verticalSpacer(4),
-              Text(
-                "A fun, easy way to keep the conversation going with your favorite people.",
-                textAlign: TextAlign.center,
-                style: TextStyle(color: getOnPrimary(context), fontSize: 12),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                child: Text(
+                  "A fun, easy way to keep the conversation going with your favorite people.",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: getOnPrimary(context), fontSize: 12),
+                ),
               ),
               verticalSpacer(30),
               BlocConsumer<AuthBloc, AuthState>(
